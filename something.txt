@@ -1,0 +1,251 @@
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ */
+
+import React, {useState} from 'react';
+import type {PropsWithChildren} from 'react';
+import {
+  NativeSyntheticEvent,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
+
+import {
+  Colors,
+  DebugInstructions,
+  Header,
+  LearnMoreLinks,
+  ReloadInstructions,
+} from 'react-native/Libraries/NewAppScreen';
+import {
+  ExternalKeyboardView,
+  KeyPress,
+  Pressable,
+} from 'react-native-external-keyboard';
+import KeyEvent from 'react-native-keyevent';
+import GlobalKeyEvent from 'react-native-global-keyevent';
+import Sound from 'react-native-sound';
+
+type SectionProps = PropsWithChildren<{
+  title: string;
+}>;
+
+function Section({children, title}: SectionProps): React.JSX.Element {
+  const isDarkMode = useColorScheme() === 'dark';
+  return (
+    <View style={styles.sectionContainer}>
+      <Text
+        style={[
+          styles.sectionTitle,
+          {
+            color: isDarkMode ? Colors.white : Colors.black,
+          },
+        ]}>
+        {title}
+      </Text>
+      <Text
+        style={[
+          styles.sectionDescription,
+          {
+            color: isDarkMode ? Colors.light : Colors.dark,
+          },
+        ]}>
+        {children}
+      </Text>
+    </View>
+  );
+}
+
+function App(): React.JSX.Element {
+  const [outputText, setOutputText] = useState<string>('');
+  const [isKeyDown, setIsKeyDown] = React.useState(true);
+  const [status, setStatus] = React.useState('Not pressed');
+  const [keyInfo, setKeyInfo] = React.useState<KeyPress | undefined>(undefined);
+
+  const isDarkMode = useColorScheme() === 'dark';
+
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
+
+  const sound = new Sound('yay.mp3', Sound.MAIN_BUNDLE, error => {
+    if (error) {
+      console.log('Error loading sound: ', error);
+    }
+  });
+
+  //   KeyEvent.onKeyDownListener(
+  //     (keyEvent: {keyCode: any; action: any; pressedKey: any}) => {
+  //       console.log(onKeyDown keyCode: ${keyEvent.keyCode});
+  //       console.log(Action: ${keyEvent.action});
+  //       console.log(Key: ${keyEvent.pressedKey});
+  //     },
+  //   );
+  //   GlobalKeyEvent.addKeyDownListener(
+  //     (evt: {keyCode: any; pressedKey: any; shift: any}) => {
+  //       console.log('---key down---');
+  //       console.log('code:', evt.keyCode);
+  //       console.log('key:', evt.pressedKey);
+  //       console.log('flag shift:', evt.shift);
+  //     },
+  //   );
+  //   GlobalKeyEvent.addKeyUpListener(
+  //     (evt: {keyCode: any; pressedKey: any; shift: any}) => {
+  //       console.log('---key up---');
+  //       console.log('code:', evt.keyCode);
+  //       console.log('key:', evt.pressedKey);
+  //       console.log('flag shift:', evt.shift);
+  //       console.log('isExternal:', evt.keyCode > 100);
+  //     },
+  //   );
+
+  const onKeyDownHandler = (
+    event: NativeSyntheticEvent<
+      Readonly<{
+        keyCode: number;
+        unicode: number;
+        unicodeChar: string;
+        isLongPress: boolean;
+        isAltPressed: boolean;
+        isShiftPressed: boolean;
+        isCtrlPressed: boolean;
+        isCapsLockOn: boolean;
+        hasNoModifiers: boolean;
+      }>
+    >,
+  ): void | Promise<void> => {
+    console.log('KeyDown', event.nativeEvent.keyCode);
+    setOutputText('KeyDown ' + event.nativeEvent.keyCode);
+    setIsKeyDown(false);
+    setKeyInfo(event.nativeEvent);
+    event.preventDefault();
+    //event.stopPropagation();
+  };
+
+  const onKeyUpHandler = (
+    event: NativeSyntheticEvent<
+      Readonly<{
+        keyCode: number;
+        unicode: number;
+        unicodeChar: string;
+        isLongPress: boolean;
+        isAltPressed: boolean;
+        isShiftPressed: boolean;
+        isCtrlPressed: boolean;
+        isCapsLockOn: boolean;
+        hasNoModifiers: boolean;
+      }>
+    >,
+  ): void | Promise<void> => {
+    console.log('KeyUp', event.nativeEvent.keyCode);
+    setOutputText('KeyUp ' + event.nativeEvent.keyCode);
+    setIsKeyDown(true);
+    setKeyInfo(event.nativeEvent);
+    //event.preventDefault();
+    //event.stopPropagation();
+    sound.play(success => {
+      if (success) {
+        console.log('Sound played successfully');
+      } else {
+        console.log('Error playing sound');
+      }
+    });
+  };
+
+  return (
+    <ExternalKeyboardView
+      onKeyDownPress={onKeyDownHandler}
+      onKeyUpPress={onKeyUpHandler}
+      canBeFocused>
+      <View accessible>
+        <SafeAreaView style={backgroundStyle}>
+          <StatusBar
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={backgroundStyle.backgroundColor}
+          />
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={backgroundStyle}>
+            <Header />
+            <View
+              style={{
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              }}>
+              <Section title="Output">
+                <Pressable
+                  focusStyle={{backgroundColor: '#a0dcbe'}}
+                  onPress={() => setStatus('onPress')}
+                  onPressIn={() => setStatus('onPressIn')}
+                  onPressOut={() => setStatus('onPressOut')}
+                  onLongPress={() => setStatus('onLongPress')}>
+                  <Text>On Press Check: {status}</Text>
+                </Pressable>
+
+                <Text>{isKeyDown ? 'Press begin:' : 'Press ended:'}</Text>
+                <Text>
+                  Volume:
+                  {'\n'}
+                  {outputText}
+                </Text>
+                {Object.keys(keyInfo ?? {}).map(key => (
+                  <View key={key}>
+                    {
+                      <Text>{${key}: ${
+                        (keyInfo as Record<string, string | number | boolean>)[
+                          key
+                        ] ?? ''
+                      }}</Text>
+                    }
+                  </View>
+                ))}
+              </Section>
+              <Section title="Step One">
+                Edi <Text style={styles.highlight}>App.tsx</Text> to change this
+                screen and then come back to see your edits.
+              </Section>
+              <Section title="See Your Changes">
+                <ReloadInstructions />
+              </Section>
+              <Section title="Debug">
+                <DebugInstructions />
+              </Section>
+              <Section title="Learn More">
+                Read the docs to discover what to do next:
+              </Section>
+              <LearnMoreLinks />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </ExternalKeyboardView>
+  );
+}
+
+const styles = StyleSheet.create({
+  sectionContainer: {
+    marginTop: 32,
+    paddingHorizontal: 24,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  sectionDescription: {
+    marginTop: 8,
+    fontSize: 18,
+    fontWeight: '400',
+  },
+  highlight: {
+    fontWeight: '700',
+  },
+});
+
+export default App;

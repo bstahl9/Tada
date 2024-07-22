@@ -2,16 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import LoaderKit from 'react-native-loader-kit';
 import { Track, useActiveTrack, useIsPlaying } from 'react-native-track-player';
+import { LibraryTrackMenu } from './LibraryTrackMenu';
 import { StopPropagation } from './StopPropagation';
 import Icon from 'react-native-vector-icons/Feather';
 
-export type TrackListItemProps = {
+export type LibraryTrackListItemProps = {
   track: Track;
   handleTrackSelect: (track: Track) => Promise<void>;
   onUpdate: () => Promise<void>;
 }
 
-const TrackListItem: React.FC<TrackListItemProps> = ({ track, handleTrackSelect, onUpdate }) => {
+const LibraryTrackListItem: React.FC<LibraryTrackListItemProps> = ({ track, handleTrackSelect, onUpdate }) => {
   const { playing } = useIsPlaying();
   const isActiveTrack = useActiveTrack()?.url === track.url;
 
@@ -92,4 +93,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrackListItem;
+export default LibraryTrackListItem;

@@ -5,7 +5,6 @@ import { useLogTrackPlayerState } from '../hooks/useLogTrackPlayer';
 import { useSetupTrackPlayer } from '../hooks/useSetupTrackPlayer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import QueueScreen from './(tabs)/QueueScreen';
 import LibraryStackNavigator from './(tabs)/(library)/';
 import RecordScreen from './(tabs)/RecordScreen';
 import SettingsScreen from './(tabs)/SettingsScreen';
@@ -13,7 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import Icon from 'react-native-vector-icons/SimpleLineIcons'; 
 import { colours } from '../constants/colours';
-import { initializeVolumeListener } from '../constants/service'; 
+import { FloatingPlayer } from '../components/FloatingPlayer';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,14 +31,6 @@ const App = () => {
         })();
     }, []);
 
-    useEffect(() => {
-        // Initialize volume listener
-        const cleanupVolumeListener = initializeVolumeListener();
-
-        // Cleanup on unmount
-        return () => cleanupVolumeListener();
-    }, []);
-
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <ThemeProvider>
@@ -56,20 +47,17 @@ const App = () => {
                                     let iconName: string;
 
                                     switch (route.name) {
-                                        case 'Queue':
-                                            iconName = 'layers'; // Change to your desired icon name
-                                            break;
                                         case 'Library':
-                                            iconName = 'music-tone'; // Change to your desired icon name
+                                            iconName = 'music-tone';
                                             break;
                                         case 'Record':
-                                            iconName = 'microphone'; // Change to your desired icon name
+                                            iconName = 'microphone'; 
                                             break;
                                         case 'Settings':
-                                            iconName = 'settings'; // Change to your desired icon name
+                                            iconName = 'settings';
                                             break;
                                         default:
-                                            iconName = 'alert'; // Fallback icon
+                                            iconName = 'alert';
                                             break;
                                     }
 
@@ -84,11 +72,18 @@ const App = () => {
                             };
                         }}
                     >
-                        <Tab.Screen name="Queue" component={QueueScreen} />
                         <Tab.Screen name="Library" component={LibraryStackNavigator} />
                         <Tab.Screen name="Record" component={RecordScreen} />
                         <Tab.Screen name="Settings" component={SettingsScreen} />
                     </Tab.Navigator>
+                    <FloatingPlayer
+                        style={{
+                            position: 'absolute',
+                            left: 8,
+                            right: 8,
+                            bottom: 78,
+                        }}
+                    />
                 </NavigationContainer>
             </ThemeProvider>
         </GestureHandlerRootView>

@@ -9,13 +9,13 @@ import { SelectSequenceModal } from '../modals/SelectSequenceModal';
 import { DeleteTrackModal } from '../modals/DeleteTrackModal';
 import { Track } from 'react-native-track-player';
 
-type TrackMenuProps = PropsWithChildren<{
+type LibraryTrackMenuProps = PropsWithChildren<{
     track: Track;
     onUpdate: () => Promise<void>;
 }>;
 
 
-export const TrackMenu = ({ track, onUpdate, children }: TrackMenuProps) => {
+export const LibraryTrackMenu = ({ track, onUpdate, children }: LibraryTrackMenuProps) => {
     const [sequences, setSequences] = useState<Sequence[]>([]);
     const [renameModalVisible, setRenameModalVisible] = useState(false);
     const [addToSequenceModalVisible, setAddToSequenceModalVisible] = useState(false);

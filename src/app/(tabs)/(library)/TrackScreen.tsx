@@ -6,7 +6,7 @@ import { Track } from 'react-native-track-player';
 import { useTheme } from '../../../context/ThemeContext';
 import { colours } from '../../../constants/colours'; 
 import { getTracksDb } from '../../../db/dbTrack';
-import TrackList from '../../../components/TrackList';
+import LibraryTrackList from '../../../components/LibraryTrackList';
 
 const TrackScreen = () => {
   const { theme } = useTheme();
@@ -48,7 +48,7 @@ const TrackScreen = () => {
           />
         }
       >
-        <TrackList tracks={tracks} queueId="none" onUpdate={fetchTracks} />
+        <LibraryTrackList tracks={tracks} queueId="none" onUpdate={fetchTracks} />
       </ScrollView>
     </View>
   );

@@ -4,32 +4,22 @@ import { Track } from 'react-native-track-player';
 import TrackListItem from './LibraryTrackListItem';
 import TrackPlayer from 'react-native-track-player';
 
-interface TrackListProps {
+interface LibraryTrackListProps {
   tracks: Track[];
-  onUpdate: () => Promise<void>;
-  playlistId: string;
+  queueId: string;
+  onUpdate?: () => Promise<void>;
 }
 
 const ListItemDivider = () => (
   <View style={styles.divider} />
 );
 
-const TrackList: React.FC<TrackListProps> = ({ tracks, onUpdate, playlistId }) => {
+const LibraryTrackList: React.FC<LibraryTrackListProps> = ({ tracks, onUpdate }) => {
   const handleTrackSelect = async (selectedTrack: Track) => {
-    try {
-      await TrackPlayer.reset();
-
-      await TrackPlayer.add(tracks);
-      
-      const selectedTrackIndex = tracks.findIndex(track => track.id === selectedTrack.id);
-      if (selectedTrackIndex !== -1) {
-        await TrackPlayer.skip(selectedTrackIndex);
-      }
-
-      await TrackPlayer.play();
-    } catch (error) {
-      console.error('Failed to select track:', error);
-    }
+    await TrackPlayer.pause();
+    await TrackPlayer.reset();
+    await TrackPlayer.add(selectedTrack);
+    await TrackPlayer.play();
   };
 
   return (
@@ -61,4 +51,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrackList;
+export default LibraryTrackList;

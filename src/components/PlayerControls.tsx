@@ -1,5 +1,4 @@
 import { colours } from '../constants/colours';
-import { FontAwesome6 } from '@expo/vector-icons'
 import Icon from 'react-native-vector-icons/Feather'
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native'
 import TrackPlayer, { useIsPlaying } from 'react-native-track-player'
@@ -46,7 +45,7 @@ export const PlayPauseButton = ({ style, iconSize = 48 }: PlayerButtonProps) => 
 export const SkipToNextButton = ({ iconSize = 30 }: PlayerButtonProps) => {
 	return (
 		<TouchableOpacity activeOpacity={0.7} onPress={() => TrackPlayer.skipToNext()}>
-			<FontAwesome6 name="forward" size={iconSize} color={colours.light.text} />
+			<Icon name="forward" size={iconSize} color={colours.light.text} />
 		</TouchableOpacity>
 	)
 }

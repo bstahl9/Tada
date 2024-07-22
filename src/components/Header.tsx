@@ -39,13 +39,13 @@ const createStyles = (theme: string) =>
   StyleSheet.create({
     safeArea: {
       backgroundColor: theme === 'dark' ? colours.dark.background : colours.light.background,
-      height: 150,
+      height: 90,
     },
     header: { 
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 10,
+      padding: 0,
     },
     headerText: { 
       marginLeft: 20,

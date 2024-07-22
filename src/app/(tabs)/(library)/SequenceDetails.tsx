@@ -54,7 +54,7 @@ const SequenceDetails = () => {
       }
     >
       <Header title={name} />
-      <TrackList tracks={tracks} queueId={name} onUpdate={fetchTracks} />
+      <TrackList tracks={tracks} playlistId={id} onUpdate={fetchTracks} />
     </ScrollView>
   );
 };

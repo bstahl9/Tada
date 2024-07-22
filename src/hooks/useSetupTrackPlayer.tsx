@@ -18,7 +18,7 @@ const setupPlayer = async () => {
     });
 
     // await TrackPlayer.setVolume(0.3) // adjust volume if needed ( 0 - 1 )
-    await TrackPlayer.setRepeatMode(RepeatMode.Off); // don't repeat any tracks
+    await TrackPlayer.setRepeatMode(RepeatMode.Queue); // don't repeat any tracks
   } catch (error) {
     console.error('Error during TrackPlayer setup:', error);
     throw error; // Re-throw the error to be caught in the useEffect

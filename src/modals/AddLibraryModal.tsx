@@ -12,9 +12,10 @@ import uuid from 'react-native-uuid';
 type AddLibraryModalProps = {
   visible: boolean;
   onClose: () => void;
+  onUpdate?: () => Promise<void>;
 };
 
-const AddLibraryModal = ({ visible, onClose }: AddLibraryModalProps) => {
+const AddLibraryModal = ({ visible, onClose, onUpdate }: AddLibraryModalProps) => {
   const [showSequenceInput, setShowSequenceInput] = useState(false);
   const [newTitle, setNewTitle] = useState("");
 
@@ -72,6 +73,7 @@ const AddLibraryModal = ({ visible, onClose }: AddLibraryModalProps) => {
 
         console.log('Imported track:', newTrack);
         await addTrackDb(newTrack); // attempt to add track to the db
+
       } else {
         console.log('No track selected');
       }

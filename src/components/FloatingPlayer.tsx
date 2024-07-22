@@ -13,7 +13,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
 	const displayedTrack = activeTrack ?? lastActiveTrack
 
 	const handlePress = () => {
-		// navigate to the queue screen
+		// navigate to the queue screen open active sequence screen
 	}
 
 	if (!displayedTrack) return null
@@ -21,6 +21,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
 	return (
 		<TouchableOpacity onPress={handlePress} activeOpacity={0.9} style={[styles.container, style]}>
 			<>
+
 				<View style={styles.trackTitleContainer}>
                     <Text style={styles.trackTitle}>{displayedTrack.title ?? ''}</Text>
 				</View>

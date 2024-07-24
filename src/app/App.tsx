@@ -13,6 +13,7 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import Icon from 'react-native-vector-icons/SimpleLineIcons'; 
 import { colours } from '../constants/colours';
 import { FloatingPlayer } from '../components/FloatingPlayer';
+import VolumeListener from '../components/VolumeListener';
 
 const Tab = createBottomTabNavigator();
 
@@ -85,6 +86,7 @@ const App = () => {
                         }}
                     />
                 </NavigationContainer>
+                <VolumeListener />
             </ThemeProvider>
         </GestureHandlerRootView>
     );

@@ -1,23 +1,21 @@
 // src/components/AddLibraryModal.tsx
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { addSequence } from '../db/dbSequence';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
 import { Track } from 'react-native-track-player';
-import { addTrackDb } from '../db/dbTrack';
 import uuid from 'react-native-uuid';
-
+import useLibraryStore from '../store/libraryStore';
 
 type AddLibraryModalProps = {
   visible: boolean;
   onClose: () => void;
-  onUpdate?: () => Promise<void>;
 };
 
-const AddLibraryModal = ({ visible, onClose, onUpdate }: AddLibraryModalProps) => {
+const AddLibraryModal = ({ visible, onClose }: AddLibraryModalProps) => {
   const [showSequenceInput, setShowSequenceInput] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const { addSequence, addTrack, fetchSequences, fetchTracks } = useLibraryStore();
 
   useEffect(() => {
     if (!visible) {
@@ -43,6 +41,7 @@ const AddLibraryModal = ({ visible, onClose, onUpdate }: AddLibraryModalProps) =
       console.log('New sequence created:', newSequence);
       setNewTitle("");
       setShowSequenceInput(false);
+      fetchSequences(); // Refresh the sequences list
       onClose();
     } catch (error) {
       console.error('Failed to add sequence:', error);
@@ -52,18 +51,17 @@ const AddLibraryModal = ({ visible, onClose, onUpdate }: AddLibraryModalProps) =
 
   const handleImportTrack = async () => {
     try {
-      const result = await DocumentPicker.pickSingle({ // open document picker
-        type: [DocumentPicker.types.audio], // only show audio files
+      const result = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.audio],
       });
 
       if (result && result.uri) {
         const audioDir = `${RNFS.DocumentDirectoryPath}/audio`;
-        await RNFS.mkdir(audioDir); // create the folder if it doesn't exist
+        await RNFS.mkdir(audioDir);
 
-        const newFileUri = `${audioDir}/${result.name}`; // define copied file path
-        await RNFS.copyFile(result.uri, newFileUri); // copy the file to the location
+        const newFileUri = `${audioDir}/${result.name}`;
+        await RNFS.copyFile(result.uri, newFileUri);
 
-        // create new track object for the db
         const newTrack: Track = {
           id: uuid.v4().toString(),
           url: newFileUri,
@@ -72,8 +70,9 @@ const AddLibraryModal = ({ visible, onClose, onUpdate }: AddLibraryModalProps) =
         };
 
         console.log('Imported track:', newTrack);
-        await addTrackDb(newTrack); // attempt to add track to the db
-
+        await addTrack(newTrack);
+        fetchTracks(); // Refresh the tracks list
+        onClose();
       } else {
         console.log('No track selected');
       }

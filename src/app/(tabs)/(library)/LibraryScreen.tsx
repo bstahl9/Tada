@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useLibraryStore from '../../../store/libraryStore';
 import { View, StyleSheet } from 'react-native';
 import Header from '../../../components/Header';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -10,6 +11,13 @@ const Tab = createMaterialTopTabNavigator();
 
 const LibraryScreen = () => {
   const [isModalVisible, setModalVisible] = useState(false);
+  const fetchSequences = useLibraryStore(state => state.fetchSequences);
+  const fetchTracks = useLibraryStore(state => state.fetchTracks);
+
+  useEffect(() => {
+    fetchSequences();
+    fetchTracks();
+  }, []);
 
   const handleButtonPress = () => {
     setModalVisible(true);
@@ -17,6 +25,8 @@ const LibraryScreen = () => {
 
   const closeModal = () => {
     setModalVisible(false);
+    fetchSequences();
+    fetchTracks();
   };
 
   return (

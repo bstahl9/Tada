@@ -1,61 +1,59 @@
-// src/screens/LibraryScreen/SequenceDetails.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { useTheme } from '../../../context/ThemeContext'; // Adjust the path if needed
-import { colours } from '../../../constants/colours'; // Adjust the path if needed
+import React from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import { useTheme } from '../../../context/ThemeContext';
+import { colours } from '../../../constants/colours';
 import Header from '../../../components/Header';
 import TrackList from '../../../components/TrackList';
-import { getTracksFromSequenceId } from '../../../db/dbJunction';
-import TrackPlayer, { Track } from 'react-native-track-player';
+import useLibraryStore from '../../../store/libraryStore';
 
 const SequenceDetails = () => {
   const { theme } = useTheme();
-  const navigation = useNavigation();
   const route = useRoute();
   const { id, name } = route.params;
+  const { sequenceTracks, isLoading, fetchTracksForSequence, setActiveSequence, activeSequence } = useLibraryStore();
 
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  React.useEffect(() => {
+    fetchTracksForSequence(id);
+  }, [id]);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchTracks();
-    }, [])
-  );
+  const handleRefresh = () => {
+    fetchTracksForSequence(id);
+  };
 
-  const fetchTracks = async () => {
+  const handleSetActiveSequence = async () => {
     try {
-      const files = await getTracksFromSequenceId(id);
-      setTracks(files);
+      await setActiveSequence(id);
+      Alert.alert('Success', `${name} set as active sequence`);
     } catch (error) {
-      console.error('Failed to fetch tracks from database:', error);
-    } finally {
-      setIsRefreshing(false);
+      console.error('Failed to set active sequence:', error);
+      Alert.alert('Error', 'Failed to set active sequence. Please try again.');
     }
   };
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    fetchTracks();
-  };
-
+  const tracks = sequenceTracks[id] || [];
   const styles = createStyles(theme);
+  const isActive = activeSequence?.id === id;
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          progressViewOffset={50}
-        />
-      }
-    >
-      <Header title={name} />
-      <TrackList tracks={tracks} playlistId={id} onUpdate={fetchTracks} />
-    </ScrollView>
+    <View style={styles.container}>
+      <Header 
+        title={name}
+        onButtonPress={handleSetActiveSequence}
+        buttonIcon={isActive ? 'check-circle' : 'play-circle'}
+      />
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={handleRefresh}
+            progressViewOffset={50}
+          />
+        }
+      >
+        <TrackList tracks={tracks} playlistId={id} onUpdate={() => fetchTracksForSequence(id)} />
+      </ScrollView>
+    </View>
   );
 };
 

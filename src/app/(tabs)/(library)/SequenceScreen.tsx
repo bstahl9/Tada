@@ -1,48 +1,29 @@
 // src/screens/LibraryScreen/SequenceScreen.tsx
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { View, StyleSheet, StatusBar, ScrollView, RefreshControl } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../../context/ThemeContext'; // Adjust the path if needed
-import { colours } from '../../../constants/colours'; // Adjust the path if needed
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../../../context/ThemeContext';
+import { colours } from '../../../constants/colours';
 import Sequence from '../../../constants/types';
-import { getSequences, deleteSequence } from '../../../db/dbSequence';
 import SequenceList from '../../../components/SequenceList';
+import useLibraryStore from '../../../store/libraryStore';
 
 const SequenceScreen = () => {
   const { theme } = useTheme();
-  const [sequences, setSequences] = useState<Sequence[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigation = useNavigation();
+  const { sequences, isLoading, fetchSequences, deleteSequence } = useLibraryStore();
 
   useFocusEffect(
-    useCallback(() => {
+    React.useCallback(() => {
       fetchSequences();
-    }, [])
+    }, [fetchSequences])
   );
 
-  const fetchSequences = async () => {
-    try {
-      const sequences = await getSequences();
-      setSequences(sequences);
-    } catch (error) {
-      console.error('Failed to fetch sequences from database:', error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   const handleDelete = async (sequence: Sequence) => {
-    try {
-      await deleteSequence(sequence);
-      fetchSequences();
-      console.log('Deleted sequence from database:', sequence);
-    } catch (error) {
-      console.error('Failed to delete sequence from database:', error);
-    }
+    await deleteSequence(sequence);
   };
 
   const handleRefresh = () => {
-    setIsRefreshing(true);
     fetchSequences();
   };
 
@@ -54,28 +35,34 @@ const SequenceScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor={theme === 'dark' ? colours.dark.background : colours.light.background} />
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? colours.dark.background : colours.light.background}
+      />
       <ScrollView
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
+            refreshing={isLoading}
             onRefresh={handleRefresh}
             progressViewOffset={50}
           />
         }
       >
-        <SequenceList sequences={sequences} deleteSequence={handleDelete} onPress={handleSequencePress} />
+        <SequenceList
+          sequences={sequences}
+          deleteSequence={handleDelete}
+          onPress={handleSequencePress}
+        />
       </ScrollView>
     </View>
   );
 };
 
-const createStyles = (theme: string) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme === 'dark' ? colours.dark.background : colours.light.background,
-    },
-  });
+const createStyles = (theme: string) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme === 'dark' ? colours.dark.background : colours.light.background,
+  },
+});
 
 export default SequenceScreen;

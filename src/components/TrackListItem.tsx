@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import LoaderKit from 'react-native-loader-kit';
 import { Track, useActiveTrack, useIsPlaying } from 'react-native-track-player';
+import { TrackMenu } from './TrackMenu';
 import { StopPropagation } from './StopPropagation';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -33,12 +34,12 @@ const TrackListItem: React.FC<TrackListItemProps> = ({ track, handleTrackSelect,
             ) : (
               <Icon name="play" size={24} color="black" style={styles.menuIcon} />
             ))}
-            <LibraryTrackMenu
+            <TrackMenu
               track={track}
               onUpdate={onUpdate}
             >
               <Icon name="more-horizontal" size={18} color="black" style={styles.menuIcon} />
-            </LibraryTrackMenu>
+            </TrackMenu>
           </StopPropagation>
         </View>
       </View>

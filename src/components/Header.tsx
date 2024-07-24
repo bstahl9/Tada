@@ -39,7 +39,7 @@ const createStyles = (theme: string) =>
   StyleSheet.create({
     safeArea: {
       backgroundColor: theme === 'dark' ? colours.dark.background : colours.light.background,
-      height: 90,
+      height: 130,
     },
     header: { 
       flexDirection: 'row',

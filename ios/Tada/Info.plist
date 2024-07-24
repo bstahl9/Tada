@@ -49,6 +49,8 @@
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow Tada to access your microphone to record audio</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>We need your permission to save audio recordings.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

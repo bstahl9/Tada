@@ -10,35 +10,31 @@ import RNFS from 'react-native-fs';
  */
 export const addSoundToSequence = async (sequence: Sequence, track: Track) => {
   try {
-    const db = await open({ 
-      name: 'sounds.db', 
-      location: RNFS.DocumentDirectoryPath 
-    });
+      const db = await open({
+          name: 'sounds.db',
+          location: RNFS.DocumentDirectoryPath
+      });
 
-    // get the current max track_order for the sequence
-    const orderQuery = `
-      SELECT MAX(track_order) as maxOrder
-      FROM sequence_tracks
-      WHERE sequence_id = ?;
-    `;
+      // Get the current maximum order for the sequence
+      const maxOrderQuery = `
+          SELECT COALESCE(MAX(track_order), 0) as maxOrder
+          FROM sequence_tracks
+          WHERE sequence_id = ?;
+      `;
+      const { rows: maxOrderResult } = await db.executeAsync(maxOrderQuery, [sequence.id]);
+      const newOrder = maxOrderResult.item(0).maxOrder + 1;
 
-    const { rows } = await db.executeAsync(orderQuery, [sequence.id]);
-    const maxOrder = rows.length > 0 ? rows.item(0).maxOrder : 0;
-    const trackOrder = maxOrder + 1;
+      // Insert the new track with the new order
+      const insertQuery = `
+          INSERT INTO sequence_tracks (sequence_id, track_id, track_order)
+          VALUES (?, ?, ?);
+      `;
+      await db.executeAsync(insertQuery, [sequence.id, track.id, newOrder]);
 
-    // insert the new track with the calculated track_order
-    const insertQuery = `
-      INSERT INTO sequence_tracks (sequence_id, track_id, track_order)
-      VALUES (?, ?, ?);
-    `;
-
-    await db.executeAsync(insertQuery, [sequence.id, track.id, trackOrder]);
-
-    console.log(`Added track ${track.title} to sequence ${sequence.name} with order ${trackOrder}`);
-
+      console.log(`Added track ${track.title} to sequence ${sequence.name} at order ${newOrder}`);
   } catch (error) {
-    console.error('Failed to add track to the sequence in the database:', error);
-    throw error;
+      console.error('Failed to add track to the sequence in the database:', error);
+      throw error;
   }
 };
 
@@ -49,40 +45,37 @@ export const addSoundToSequence = async (sequence: Sequence, track: Track) => {
  */
 export const getTracksFromSequenceId = async (sequenceId: string): Promise<Track[]> => {
   try {
-    const db = await open({ 
-      name: 'sounds.db', 
-      location: RNFS.DocumentDirectoryPath 
-    });
+      const db = await open({
+          name: 'sounds.db',
+          location: RNFS.DocumentDirectoryPath
+      });
 
-    // query to fetch tracks associated with the sequence, ordered by track_order
-    const query = `
-      SELECT t.id, t.url, t.title, t.artist 
-      FROM tracks t
-      INNER JOIN sequence_tracks st ON t.id = st.track_id
-      WHERE st.sequence_id = ?
-      ORDER BY st.track_order;
-    `;
+      // Query to fetch tracks associated with the sequence, ordered by the 'order' column
+      const query = `
+          SELECT t.id, t.url, t.title, t.artist, st.track_order
+          FROM tracks t
+          INNER JOIN sequence_tracks st ON t.id = st.track_id
+          WHERE st.sequence_id = ?
+          ORDER BY st.track_order;
+      `;
+      const { rows } = await db.executeAsync(query, [sequenceId]);
 
-    const { rows } = await db.executeAsync(query, [sequenceId]);
-    const tracks: Track[] = [];
+      const tracks: Track[] = [];
+      for (let i = 0; i < rows.length; i++) {
+          const track: Track = {
+              id: rows.item(i).id,
+              title: rows.item(i).title,
+              url: rows.item(i).url,
+              artist: rows.item(i).artist,
+              order: rows.item(i).order, // You might want to add this to your Track type
+          };
+          tracks.push(track);
+      }
 
-    // map rows to Track objects
-    for (let i = 0; i < rows.length; i++) {
-      const track: Track = {
-        id: rows.item(i).id,
-        title: rows.item(i).title,
-        url: rows.item(i).url,
-        artist: rows.item(i).artist,
-      };
-      tracks.push(track);
-    }
-
-    console.log(`Fetched ${tracks.length} tracks for sequence ${sequenceId}`);
-    
-    return tracks;
-
+      console.log(`Fetched ${tracks.length} tracks for sequence ${sequenceId}`);
+      return tracks;
   } catch (error) {
-    console.error('Failed to fetch tracks for sequence:', error);
-    throw error;
+      console.error('Failed to fetch tracks for sequence:', error);
+      throw error;
   }
 };
